@@ -158,7 +158,7 @@ components:
             annotations:
               type: object
               example:
-                effx.io/owned-by: core-services
+                effx.io/reports-to: core-services
             labels:
               type: object
               additionalProperties:
