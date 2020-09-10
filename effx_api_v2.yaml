@@ -9,6 +9,9 @@ servers:
 paths:
   /ingest:
     post:
+      tags:
+        - services
+        - teams
       description: Receives effx objects and saves them to the effx platform
       operationId: ingest
       requestBody:
