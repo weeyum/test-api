@@ -1,0 +1,182 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: effx API
+  license:
+    name: MIT
+servers:
+  - url: https://api.effx.io/v2
+paths:
+  /ingest:
+    post:
+      description: Receives effx objects and saves them to the effx platform
+      operationId: ingest
+      requestBody:
+        description: A list of effx objects that can consist of multiple types
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestParameters'
+          text/x-yaml:
+            schema:
+              $ref: '#/components/schemas/IngestParameters'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    BadRequest:
+      description: request is invalid
+    Created:
+      description: created
+    InternalServerError:
+      description: internal server error
+    NotFound:
+      description: resource not found
+    Ok:
+      description: success
+    Unauthorized:
+      description: api key is not valid
+  schemas:
+    IngestParameters:
+      type: array
+      items:
+        oneOf:
+        - $ref: '#/components/schemas/ServiceConfiguration'
+        - $ref: '#/components/schemas/TeamConfiguration'
+    Link:
+      type: object
+      required:
+      - name
+      - url
+      properties:
+        name: 
+          type: string
+          example: link label
+        url:
+          type: string
+          format: uri
+          example: https://app.effx.com
+    LinkGroup:
+      type: object
+      required:
+      - name
+      - links
+      properties:
+        name:
+          type: string
+          example: Dashboards
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    ServiceConfiguration:
+      type: object
+      required:
+      - kind
+      - apiVersion
+      - metadata
+      properties:
+        kind:
+          type: string
+          pattern: ^Service$
+          example: Service
+        apiVersion:
+          type: string
+          pattern: ^effx.io\/v1$
+          example: effx.io/v1
+        metadata:
+          type: object
+          required:
+          - name
+          properties:
+            name:
+              type: string
+              example: auth-service
+            annotations:
+              type: object
+              example:
+                effx.io/owned-by: authentication team
+                effx.io/managed-by: https://github.com/effxhq/effx-api/effx.yaml
+            labels:
+              type: object
+              additionalProperties:
+                type: string
+                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\.\-_\/]+[a-zA-Z0-9]$
+              example:
+                go: 1.13.5
+                tier: 0
+                group: auth
+        spec:
+          type: object
+          properties:
+            contact_information:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: auth@effx.com
+                on_call:
+                  $ref: '#/components/schemas/Link'
+                chat:
+                  $ref: '#/components/schemas/Link'
+            link_groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/LinkGroup'
+    TeamConfiguration:
+      type: object
+      required:
+      - kind
+      - apiVersion
+      - metadata
+      properties:
+        kind:
+          type: string
+          pattern: ^Team$
+          example: Team
+        apiVersion:
+          type: string
+          pattern: ^effx.io\/v1$
+          example: effx.io/v1
+        metadata:
+          type: object
+          required:
+          - name
+          properties:
+            name:
+              type: string
+              example: authentication team
+            annotations:
+              type: object
+              example:
+                effx.io/owned-by: core-services
+            labels:
+              type: object
+              additionalProperties:
+                type: string
+                pattern: ^[a-zA-Z0-9][a-zA-Z0-9\.\-_\/]+[a-zA-Z0-9]$
+              example:
+                group: auth
+        spec:
+          type: object
+          properties:
+            contact_information:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: auth@effx.com
+                on_call:
+                  $ref: '#/components/schemas/Link'
+                chat:
+                  $ref: '#/components/schemas/Link'
